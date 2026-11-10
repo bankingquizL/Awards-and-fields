@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bank Exam Quiz</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+}
+
+/* ========================= */
+/* TIMER AREA */
+/* ========================= */
+
+#timer-container{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:#f4f6f9;
+    padding-bottom:10px;
+}
+
+#timer{
+    background:#222;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:22px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.timer-buttons{
+    text-align:center;
+}
+
+#pauseBtn,
+#resumeBtn{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin:5px;
+}
+
+#pauseBtn{
+    background:#ff9800;
+    color:white;
+}
+
+#resumeBtn{
+    background:#28a745;
+    color:white;
+}
+
+.question{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.question h3{
+    margin-bottom:15px;
+}
+
+.option{
+    display:block;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.option:hover{
+    background:#f0f0f0;
+}
+
+.selected{
+    background:#cfe2ff;
+    border:2px solid #0d6efd;
+}
+
+.mark-btn{
+    margin-top:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#ff9800;
+    color:white;
+}
+
+.marked{
+    background:#ffcc80 !important;
+}
+
+.review-marked{
+    background:#e0e0e0 !important;
+    border:2px solid #9e9e9e;
+}
+
+.clear-btn{
+    margin-top:10px;
+    margin-left:10px;
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#dc3545;
+    color:white;
+}
+
+.submit-btn{
+    width:100%;
+    padding:15px;
+    font-size:20px;
+    border:none;
+    border-radius:10px;
+    background:#28a745;
+    color:white;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.result-box{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.review-btn{
+    padding:12px 20px;
+    margin-top:20px;
+    border:none;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.review-question{
+    background:white;
+    padding:20px;
+    margin:20px 0;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.correct{
+    color:green;
+    font-weight:bold;
+}
+
+.wrong{
+    color:red;
+    font-weight:bold;
+}
+
+.unanswered{
+    color:orange;
+    font-weight:bold;
+}
+
+.correct-answer{
+    background:#d4edda;
+    padding:10px;
+    border-radius:8px;
+    margin-top:10px;
+}
+
+.disabled-option{
+    pointer-events:none;
+    opacity:0.6;
+}
+
+.disabled-btn{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Bank Exam MCQ Quiz</h1>
+
+<!-- ========================= -->
+<!-- TIMER -->
+<!-- ========================= -->
+
+<div id="timer-container">
+
+    <div id="timer">
+        Time Left: 20:00
+    </div>
+
+    <div class="timer-buttons">
+
+        <button id="pauseBtn" onclick="pauseTimer()">
+            Pause
+        </button>
+
+        <button id="resumeBtn" onclick="resumeTimer()" disabled>
+            Resume
+        </button>
+
+    </div>
+
+</div>
+
+<div id="quiz"></div>
+
+<button class="submit-btn" onclick="submitQuiz()">
+Submit Quiz
+</button>
+
+</div>
+
+<script>
+
+// ===============================
+// QUESTIONS AREA
+// ===============================
+
+const questions = [
+{q:"Bharat Ratna, India's highest civilian award, is conferred for exceptional service or performance of the highest order in fields such as art, science and public service. Which of the following is also included in the fields mentioned in the provided list?",options:["Military gallantry only","Sports","Disaster management only","Agriculture only"],answer:1},
+{q:"The Padma Awards are among India's prestigious civilian honours. Which of the following correctly represents the order of these three awards from the highest to the third highest?",options:["Padma Shri – Padma Bhushan – Padma Vibhushan","Padma Bhushan – Padma Shri – Padma Vibhushan","Padma Vibhushan – Padma Bhushan – Padma Shri","Padma Vibhushan – Padma Shri – Padma Bhushan"],answer:2},
+{q:"Padma Vibhushan, one of India's highest civilian awards, recognises exceptional and distinguished service. Which award is specifically associated with distinguished service of a high order?",options:["Padma Bhushan","Padma Shri","Bharat Ratna","Padma Vibhushan"],answer:0},
+{q:"Which of the following civilian awards recognises distinguished service and is ranked below Padma Bhushan and Padma Vibhushan in the Padma Awards hierarchy?",options:["Bharat Ratna","Padma Shri","Param Vir Chakra","Ashoka Chakra"],answer:1},
+{q:"Param Vir Chakra (PVC) is India's highest wartime military gallantry award. Which of the following awards is associated with wartime military gallantry immediately below it in the gallantry award hierarchy?",options:["Kirti Chakra","Ashoka Chakra","Maha Vir Chakra","Shaurya Chakra"],answer:2},
+{q:"Ashoka Chakra is an important Indian gallantry award associated with acts of bravery during peacetime. Which category is correctly associated with this award in the given list?",options:["Distinguished service during wartime","Military gallantry during wartime","Life-saving acts","Civilian gallantry during peacetime"],answer:3},
+{q:"Which of the following pairs correctly differentiates the wartime and peacetime gallantry awards listed in the provided material?",options:["Maha Vir Chakra – Wartime; Kirti Chakra – Peacetime","Ashoka Chakra – Wartime; Vir Chakra – Peacetime","Shaurya Chakra – Wartime; Maha Vir Chakra – Peacetime","Param Vir Chakra – Peacetime; Ashoka Chakra – Wartime"],answer:0},
+{q:"Sarvottam Yudh Seva Medal and Param Vishisht Seva Medal are associated with distinguished service. Which of the following correctly identifies their respective fields?",options:["Life-saving acts and national integration","Distinguished service during wartime and distinguished service in the Armed Forces","Peacetime gallantry and wartime gallantry","Disaster management and public administration"],answer:1},
+{q:"Major Dhyan Chand Khel Ratna Award is regarded as India's highest sporting honour. Which of the following awards is specifically meant to recognise outstanding sports performance?",options:["Dronacharya Award","Rashtriya Khel Protsahan Puruskar","Arjuna Award","MAKA Trophy"],answer:2},
+{q:"The Dronacharya Award is one of India's important national sports awards. Which category of individuals is primarily recognised through this award?",options:["Outstanding athletes only","Universities with the best sports performance","Individuals promoting sports infrastructure","Sports coaches"],answer:3},
+{q:"Maulana Abul Kalam Azad (MAKA) Trophy is associated with the promotion of sports at the institutional level. Which achievement does this trophy recognise?",options:["Best-performing university in sports","Outstanding performance by an individual athlete","Lifetime contribution of a sports coach","Promotion of adventure sports"],answer:0},
+{q:"Rashtriya Khel Protsahan Puruskar is a national award associated with the development of sports in India. What is its primary area of recognition?",options:["Outstanding individual sporting performance","Promotion and development of sports","Sports coaching excellence","Adventure sports achievements"],answer:1},
+{q:"Tenzing Norgay National Adventure Award recognises achievements in which field?",options:["Classical music and dance","Military gallantry","Adventure sports","Sports coaching"],answer:2},
+{q:"Dadasaheb Phalke Award is a prestigious recognition in India's film industry. Which of the following fields is associated with this award?",options:["Music composition","Journalism","Literature","Cinema"],answer:3},
+{q:"Which of the following awards is associated with Indian cinema and is distinct from the Dadasaheb Phalke Award, which is also related to the film industry?",options:["National Film Awards","Sangeet Natak Akademi Award","Lalit Kala Akademi Award","Sahitya Akademi Award"],answer:0},
+{q:"The Nobel Prize is an internationally recognised award covering several disciplines. Which of the following combinations includes only fields associated with the Nobel Prize according to the given list?",options:["Architecture, Mathematics, Magic and Sports","Peace, Literature, Economics, Physics, Chemistry and Medical Science","Journalism, Agriculture, Architecture and Music","Technology, Environmental Protection, Sports and Public Administration"],answer:1},
+{q:"The Grammy Award is one of the major international awards frequently asked in banking and general awareness examinations. It is primarily associated with which field?",options:["Film","Literature","Music","Journalism"],answer:2},
+{q:"The Pulitzer Prize is a major international award associated with multiple fields. Which of the following combinations correctly identifies the fields mentioned in the provided list?",options:["Film, music and architecture","Science, medicine and mathematics","Sports, journalism and agriculture","Journalism, literature and music composition"],answer:3},
+{q:"Jnanpith Award is one of India's most prestigious literary honours. Which field is primarily associated with this award?",options:["Literature","Classical music","Science and technology","Sports"],answer:0},
+{q:"Sahitya Akademi Award and Sahitya Akademi Fellowship are both associated with literary recognition in India. Which statement correctly describes the Fellowship according to the given list?",options:["Award for young writers","Highest honour of Sahitya Akademi","Award for children's literature","Award for visual arts"],answer:1},
+{q:"Sahitya Akademi Yuva Puraskar and Sahitya Akademi Bal Sahitya Puraskar are literary awards with different target groups. Which of the following is correctly matched?",options:["Yuva Puraskar – Children's literature; Bal Sahitya Puraskar – Young writers","Yuva Puraskar – Sanskrit literature; Bal Sahitya Puraskar – Hindi literature","Yuva Puraskar – Young writers; Bal Sahitya Puraskar – Children's literature","Yuva Puraskar – Performing arts; Bal Sahitya Puraskar – Visual arts"],answer:2},
+{q:"The Shanti Swarup Bhatnagar Award is a prominent Indian award associated with scientific contributions. Which broader field is it primarily connected with?",options:["Literature","Sports","Public administration","Science"],answer:3},
+{q:"Rashtriya Vigyan Puraskar recognises contributions in science and technology. Which of the following award categories under this system is specifically associated with lifetime achievement in science?",options:["Vigyan Ratna","Vigyan Shri","Vigyan Yuva–Shanti Swarup Bhatnagar Award","Vigyan Team Award"],answer:0},
+{q:"Which of the following international awards is associated with computer science and is frequently relevant to technology-related general awareness questions?",options:["Abel Prize","Turing Award","Fields Medal","Wolf Prize"],answer:1},
+{q:"The Ramon Magsaysay Award is an internationally recognised award associated with contributions to society. Which of the following areas is covered by this award?",options:["Architecture and urban planning","Medical research and innovation","Public service, leadership and social change","Environmental emergencies and disaster response"],answer:2},
+];
+
+
+
+// ===============================
+// VARIABLES
+// ===============================
+
+let userAnswers = new Array(questions.length).fill(null);
+
+let markedForReview = new Array(questions.length).fill(false);
+
+let submitted = false;
+
+// ===============================
+// LOAD QUIZ
+// ===============================
+
+function loadQuiz(){
+
+    const quizDiv = document.getElementById("quiz");
+
+    questions.forEach((question,index)=>{
+
+        const qDiv = document.createElement("div");
+
+        qDiv.classList.add("question");
+
+        qDiv.id = `question_${index}`;
+
+        qDiv.innerHTML = `
+        <h3>Q${index+1}. ${question.q}</h3>
+        `;
+
+        question.options.forEach((option,optIndex)=>{
+
+            const opt = document.createElement("div");
+
+            opt.classList.add("option");
+
+            opt.innerText = option;
+
+            opt.onclick = ()=>selectOption(index,optIndex,opt);
+
+            opt.id = `q${index}_opt${optIndex}`;
+
+            qDiv.appendChild(opt);
+
+        });
+
+        // MARK BUTTON
+
+        const markBtn = document.createElement("button");
+
+        markBtn.innerText = "Mark For Review";
+
+        markBtn.classList.add("mark-btn");
+
+        markBtn.onclick = ()=>toggleMark(index,markBtn);
+
+        qDiv.appendChild(markBtn);
+
+        // CLEAR BUTTON
+
+        const clearBtn = document.createElement("button");
+
+        clearBtn.innerText = "Clear";
+
+        clearBtn.classList.add("clear-btn");
+
+        clearBtn.onclick = ()=>clearAnswer(index);
+
+        qDiv.appendChild(clearBtn);
+
+        quizDiv.appendChild(qDiv);
+
+    });
+
+}
+
+// ===============================
+// SELECT OPTION
+// ===============================
+
+function selectOption(qIndex,optIndex,element){
+
+    if(submitted) return;
+
+    userAnswers[qIndex] = optIndex;
+
+    const options = document.querySelectorAll(`[id^="q${qIndex}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+    element.classList.add("selected");
+
+}
+
+// ===============================
+// MARK FOR REVIEW
+// ===============================
+
+function toggleMark(index,button){
+
+    markedForReview[index] = !markedForReview[index];
+
+    const questionBox = document.getElementById(`question_${index}`);
+
+    if(markedForReview[index]){
+
+        button.classList.add("marked");
+
+        button.innerText = "Marked For Review";
+
+        questionBox.classList.add("review-marked");
+
+    }else{
+
+        button.classList.remove("marked");
+
+        button.innerText = "Mark For Review";
+
+        questionBox.classList.remove("review-marked");
+
+    }
+
+}
+
+// ===============================
+// CLEAR ANSWER
+// ===============================
+
+function clearAnswer(index){
+
+    if(submitted) return;
+
+    userAnswers[index] = null;
+
+    const options = document.querySelectorAll(`[id^="q${index}_opt"]`);
+
+    options.forEach(opt=>{
+        opt.classList.remove("selected");
+    });
+
+}
+
+// ===============================
+// SUBMIT QUIZ
+// ===============================
+
+function submitQuiz(){
+
+    if(submitted) return;
+
+    submitted = true;
+
+    clearInterval(timer);
+
+    let score = 0;
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        if(userAns === null){
+
+            unansweredCount++;
+
+        }
+        else if(userAns === question.answer){
+
+            score += 1;
+            correctCount++;
+
+        }
+        else{
+
+            score -= 0.25;
+            wrongCount++;
+
+        }
+
+    });
+
+    let attempted = correctCount + wrongCount;
+
+    let accuracy = attempted > 0
+    ? ((correctCount/attempted)*100).toFixed(2)
+    : 0;
+
+    document.body.innerHTML = `
+
+    <div class="container">
+
+        <div class="result-box">
+
+            <h1>Quiz Submitted ✅</h1>
+
+            <h2>Total Score: ${score.toFixed(2)}</h2>
+
+            <h3>Correct Answers: ${correctCount}</h3>
+
+            <h3>Wrong Answers: ${wrongCount}</h3>
+
+            <h3>Unanswered Questions: ${unansweredCount}</h3>
+
+            <h3>Accuracy: ${accuracy}%</h3>
+
+            <button class="review-btn" onclick="reviewAnswers()">
+            Review Answers
+            </button>
+
+            <div id="reviewSection"></div>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+// ===============================
+// REVIEW ANSWERS
+// ===============================
+
+function reviewAnswers(){
+
+    const reviewSection = document.getElementById("reviewSection");
+
+    let html = `<h1 style="margin-top:40px;">Review Section</h1>`;
+
+    questions.forEach((question,index)=>{
+
+        const userAns = userAnswers[index];
+
+        let status = "";
+        let marks = "";
+
+        if(userAns === null){
+
+            status = `<span class="unanswered">Unanswered</span>`;
+            marks = `0 Marks`;
+
+        }
+        else if(userAns === question.answer){
+
+            status = `<span class="correct">Correct ✅</span>`;
+            marks = `+1 Mark`;
+
+        }
+        else{
+
+            status = `<span class="wrong">Wrong ❌</span>`;
+            marks = `-0.25 Mark`;
+
+        }
+
+        html += `
+
+        <div class="review-question">
+
+            <h3>Q${index+1}. ${question.q}</h3>
+
+            <p>${status}</p>
+
+            <p><b>Marks:</b> ${marks}</p>
+
+            <p>
+            <b>Your Answer:</b>
+            ${
+                userAns === null
+                ? "Not Attempted"
+                : question.options[userAns]
+            }
+            </p>
+
+            <div class="correct-answer">
+            <b>Correct Answer:</b>
+            ${question.options[question.answer]}
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    reviewSection.innerHTML = html;
+
+}
+
+// ===============================
+// TIMER
+// ===============================
+
+let time = 1800;
+
+let timer;
+
+let isPaused = false;
+
+function startTimer(){
+
+    timer = setInterval(()=>{
+
+        if(!isPaused){
+
+            let minutes = Math.floor(time/60);
+
+            let seconds = time%60;
+
+            document.getElementById("timer").innerText =
+            `Time Left: ${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+
+            time--;
+
+            if(time < 0){
+
+                clearInterval(timer);
+
+                alert("Time is up! Quiz auto-submitted.");
+
+                submitQuiz();
+
+            }
+
+        }
+
+    },1000);
+
+}
+
+// ===============================
+// PAUSE TIMER
+// ===============================
+
+function pauseTimer(){
+
+    if(submitted) return;
+
+    isPaused = true;
+
+    document.getElementById("pauseBtn").disabled = true;
+
+    document.getElementById("resumeBtn").disabled = false;
+
+    // Disable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.add("disabled-option");
+    });
+
+    // Disable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = true;
+        btn.classList.add("disabled-btn");
+    });
+
+}
+// ===============================
+// RESUME TIMER
+// ===============================
+
+function resumeTimer(){
+
+    if(submitted) return;
+
+    isPaused = false;
+
+    document.getElementById("pauseBtn").disabled = false;
+
+    document.getElementById("resumeBtn").disabled = true;
+
+    // Enable options
+    document.querySelectorAll(".option").forEach(opt=>{
+        opt.classList.remove("disabled-option");
+    });
+
+    // Enable buttons
+    document.querySelectorAll(".mark-btn, .clear-btn").forEach(btn=>{
+        btn.disabled = false;
+        btn.classList.remove("disabled-btn");
+    });
+
+}
+// ===============================
+
+loadQuiz();
+
+startTimer();
+
+</script>
+
+</body>
+</html>
